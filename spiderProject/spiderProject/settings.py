@@ -56,7 +56,7 @@ COOKIES_ENABLED = False
 DOWNLOADER_MIDDLEWARES = {
    'spiderProject.middlewares.RandomProxyMiddlewate': 749,
 }
-DOWNLOAD_TIMEOUT = 15
+DOWNLOAD_TIMEOUT = 10
 LOG_LEVEL = 'INFO'
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
