@@ -1,5 +1,4 @@
 import requests
-from lxml import etree
 from queue import Queue
 import threading
 import time
@@ -7,12 +6,9 @@ import time
 class climbvideo():
     def __init__(self):
         self.data = [
-            "http://168.119.137.56:3128",
-            "http://102.129.249.120:3128",
-            "http://46.223.255.8:8080",
-            "http://178.62.56.172:80",
-            "http://84.91.22.240:80",
-            "http://14.97.2.104:80",
+            "http://49.85.84.213:8007",
+            "http://136.243.211.104:80",
+            "https://107.178.9.186:8080",
         ]
         self.headers = {
             'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36'
@@ -69,20 +65,24 @@ class climbvideo():
 
     #4、业务逻辑模块
     def sun_proxy(self,level2_url):
-
+        scheme = urlparse(level2_url).scheme
+        netloc = scheme+'://'+urlparse(level2_url).netloc
+        proxies = {scheme:netloc}
+        # print(proxies)
         try:
-            r2 = requests.get(level2_url, headers=self.headers, timeout=1)
-            print(r2.status_code)
+            r2 = requests.get('http://httpbin.org/get', headers=self.headers,proxies=proxies, timeout=3)
             if r2.status_code == 200:
+                print('服务器检测到我们的IP地址:%s' % r2.json()['origin'])
                 self.result.append(level2_url)
         except Exception as result:
-            # print(result)
+            print(result)
             pass
 
-
+from urllib.parse import urlparse
 if __name__=='__main__':
     sun = climbvideo()
     sun.queue_ssignment()
+    print('-'*50)
     print('一下是可用代理')
     for item in sun.result:
         print(item)
