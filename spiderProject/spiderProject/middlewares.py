@@ -145,7 +145,6 @@ class RandomProxyMiddlewate(object):
         self.PROXYS = settings.getlist('SUNPROXYS') #从设置中读取数据,并设置为类属性
         print('代理池中总共有 %s 个代理' % len(self.PROXYS))
         self.state = defaultdict(int)
-        #self.max_failed = 3
         print('2、初始化类属性')
 
     #第一步,创建中间件对象
@@ -196,7 +195,7 @@ class RandomProxyMiddlewate(object):
             #当某个IP的失败次数累计到一定量
             if self.SUN_RETRY_TIMES_RESPONSE == self.RETRY_TIMES:
                 #可以认为该IP已经被对方服务器封禁,从代理池中删除该IP
-                print('5、服务器 -> 错误码 (%s) ,拒绝IP 超%s次,已删除 代理 ' % (response.status, self.max_failed,curl_proxy))
+                print('5、服务器 -> 错误码 (%s) ,拒绝IP 超%s次,已删除 代理 %s' % (response.status, self.RETRY_TIMES,curl_proxy))
                 self.PROXYS.remove(curl_proxy)
                 del request.meta[self.scheme]
 
