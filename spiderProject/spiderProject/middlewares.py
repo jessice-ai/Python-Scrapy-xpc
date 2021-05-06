@@ -256,7 +256,7 @@ class RandomProxyMiddlewate(object):
         else:
             # return request 标识: 如果代理IP有问题,则会自动切换重新执行
             # process_request 获取新的IP地址,设置中的参数 RETRY_TIMES = 15 表示最多重试16次执行 process_request获取新的代理IP ,然后不断提示放弃重试
-            return request
+            yield request
 
 
 
