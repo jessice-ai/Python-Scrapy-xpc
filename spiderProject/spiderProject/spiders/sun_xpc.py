@@ -6,6 +6,8 @@ import json
 cookies = dict(
 
 )
+
+
 class SunXpcSpider(scrapy.Spider):
     name = 'sun_xpc'
     allowed_domains = ['xinpianchang.com']
@@ -33,7 +35,7 @@ class SunXpcSpider(scrapy.Spider):
             # print(url % item)
             request = response.follow(url % item, callback=self.parse_post, headers=self.headers, dont_filter=True)
             request.meta['sun_url'] = url % item  # 把值传递到回调函数中  self.parse_post
-            #yield request #这里禁止掉,表示其他页面不跑,取消注释抓取所有页面里面的内容
+            yield request  # 这里禁止掉,表示其他页面不跑,取消注释抓取所有页面里面的内容
 
         # 分页代码
         pages = response.xpath('//div[@class="page"]/a/@href').extract()
@@ -41,7 +43,8 @@ class SunXpcSpider(scrapy.Spider):
             print('https://www.xinpianchang.com%s' % page)
 
             # 这里没有添加 dont_filter=True ,因为链接中有重复的,不添加,可自动去重
-            yield response.follow('https://www.xinpianchang.com%s' % page, callback=self.parse, headers=self.headers,cookies={'Authorization':'33CFA2358B6C9135C8B6C9462A8B6C9B6588B6C9DBF6A1DFC7DB'})
+            yield response.follow('https://www.xinpianchang.com%s' % page, callback=self.parse, headers=self.headers,
+                                  cookies={'Authorization': '33CFA2358B6C9135C8B6C9462A8B6C9B6588B6C9DBF6A1DFC7DB'})
 
     def parse_post(self, response):
 
