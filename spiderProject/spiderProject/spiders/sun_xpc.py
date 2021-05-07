@@ -3,10 +3,13 @@ from fake_useragent import UserAgent
 from urllib.parse import urlparse
 import json
 
+cookies = dict(
+
+)
 class SunXpcSpider(scrapy.Spider):
     name = 'sun_xpc'
     allowed_domains = ['xinpianchang.com']
-    start_urls = ['https://www.xinpianchang.com/channel/index/type-/sort-like/duration_type-0/resolution_type-/page-2']
+    start_urls = ['https://www.xinpianchang.com/channel/index/type-/sort-like/duration_type-0/resolution_type-/page-1']
 
     headers = {
         'User-Agent': UserAgent().chrome,
@@ -17,29 +20,37 @@ class SunXpcSpider(scrapy.Spider):
     }
 
     def start_requests(self):
+
         for url in self.start_urls:
             # 说明 dont_filter=True Scrapy内置了重复过滤功能,设置为True表示,不过滤重复请求
-            yield scrapy.Request(url,callback=self.parse, headers=self.headers,dont_filter=True)
+            yield scrapy.Request(url, callback=self.parse, headers=self.headers, dont_filter=True)
 
     def parse(self, response):
 
-        list = response.xpath('//ul[@class="video-list"]/li/@data-articleid').extract() # extract() 从一个对象中得到列表[]
-        for item in  list:
+        list = response.xpath('//ul[@class="video-list"]/li/@data-articleid').extract()  # extract() 从一个对象中得到列表[]
+        for item in list:
             url = 'https://www.xinpianchang.com/a%s?from=ArticleList'
             # print(url % item)
-            request = response.follow(url % item,callback=self.parse_post,headers=self.headers,dont_filter=True)
+            request = response.follow(url % item, callback=self.parse_post, headers=self.headers, dont_filter=True)
             request.meta['sun_url'] = url % item  # 把值传递到回调函数中  self.parse_post
-            yield request
+            #yield request #这里禁止掉,表示其他页面不跑,取消注释抓取所有页面里面的内容
 
+        # 分页代码
+        pages = response.xpath('//div[@class="page"]/a/@href').extract()
+        for page in pages:
+            print('https://www.xinpianchang.com%s' % page)
 
-    def parse_post(self,response):
-        SunPost = {}
-        SunPost['url'] = response.meta['sun_url'] #接收数据
+            # 这里没有添加 dont_filter=True ,因为链接中有重复的,不添加,可自动去重
+            yield response.follow('https://www.xinpianchang.com%s' % page, callback=self.parse, headers=self.headers,cookies={'Authorization':'33CFA2358B6C9135C8B6C9462A8B6C9B6588B6C9DBF6A1DFC7DB'})
+
+    def parse_post(self, response):
+
+        SunPost = {'url': response.meta['sun_url']}
         # .get() 与 .extract() 作用一样 从一个对象中得到列表[]
-        sdrrTitle = response.xpath('//div[contains(@class,"title-wrap")]/h3/text()').extract()
-        SunPost['titile'] = ""
+        stderrTitle = response.xpath('//div[contains(@class,"title-wrap")]/h3/text()').extract()
+        SunPost['title'] = ""
         try:
-            SunPost['titile'] = sdrrTitle[0]
+            SunPost['title'] = stderrTitle[0]
         except Exception as result:
             print(result)
 
@@ -57,22 +68,19 @@ class SunXpcSpider(scrapy.Spider):
                 # Host 是 HTTP / 1.1 必须包含参数,作用:指定用户要访问的域名
                 "Host": "%s:80" % urlparse(url).netloc,
             }
-            #yield response.follow(url, callback=self.parse_video, headers=headers, dont_filter=True)
+            # yield response.follow(url, callback=self.parse_video, headers=headers, dont_filter=True)
             request = scrapy.Request(url, callback=self.parse_video, headers=headers, dont_filter=True)
-            request.meta['SunPost'] = SunPost #把值传递到回调函数中  self.parse_video
+            request.meta['SunPost'] = SunPost  # 把值传递到回调函数中  self.parse_video
             yield request
 
         else:
             print('这个mediaId是None')
 
+    def parse_video(self, response):
 
-    def parse_video(self,response):
-
-        #接受传递过来的值
+        # 接受传递过来的值
         SunPost = response.meta['SunPost']
-        dict = json.loads(response.text)
-        video = dict['data']['resource']['progressive'][0]['url']
+        dicts = json.loads(response.text)
+        video = dicts['data']['resource']['progressive'][0]['url']
         SunPost['video'] = video
         print(SunPost)
-
-
