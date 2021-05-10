@@ -20,7 +20,7 @@ NEWSPIDER_MODULE = 'spiderProject.spiders'
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 10
+CONCURRENT_REQUESTS = 6
 RETRY_ENABLED = True
 RETRY_TIMES = 10
 RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429]

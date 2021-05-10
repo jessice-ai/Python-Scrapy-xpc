@@ -34,6 +34,10 @@ class SunXpcSpider(scrapy.Spider):
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=26))
 
     def parse(self, response):
+        # 自动进入 scrapy shell 互动式抓取控制台
+        # from scrapy.shell import inspect_response
+        # inspect_response(response, self)
+
         print(response.headers)  # 返回服务器给返回的头部信息配置
         # response.headers 打印内容:
         # {b'Server': [b'JSP3/2.0.14'], b'Date': [b'Mon, 10 May 2021 05:05:35 GMT'], b'Content-Type': [b'text/html;
@@ -55,7 +59,9 @@ class SunXpcSpider(scrapy.Spider):
             request = response.follow(url % item, callback=self.parse_post, headers=self.headers, dont_filter=True)
             request.meta['sun_url'] = url % item  # 把值传递到回调函数中  self.parse_post
             # yield request  # 这里禁止掉,表示其他页面不跑,取消注释抓取所有页面里面的内容
-            
+
+        Cookie = response.request.headers.getlist('Cookie')
+        print(Cookie)
 
         # 分页代码
         pages = response.xpath('//div[@class="page"]/a/@href').extract()
@@ -67,20 +73,18 @@ class SunXpcSpider(scrapy.Spider):
             print('https://www.xinpianchang.com%s' % page)
 
             # 这里没有添加 dont_filter=True ,因为链接中有重复的,不添加,可自动去重
-            Cookie = response.request.headers.getlist('Cookie')
-            print(Cookie)
 
-            if self.page_read_count % 20 == 0:
+            if self.page_read_count % 10 == 0:
                 # Authorization 验证用户是否登陆
                 # PHPSESSID 验证用户是否是同一个人客户访问,每个20个页面,重置一个PHPSESSID值
                 yield response.follow('https://www.xinpianchang.com%s' % page, callback=self.parse,
                                       headers=self.headers,
-                                      cookies={'Authorization': '33CFA2358B6C9135C8B6C9462A8B6C9B6588B6C9DBF6A1DFC7DB',
+                                      cookies={'Authorization': '1BAAB0213B21A7B043B21A425E3B21A83663B21A255699AE35B2',
                                                'PHPSESSID': self.gen_sessionid()})
             else:
                 yield response.follow('https://www.xinpianchang.com%s' % page, callback=self.parse,
                                       headers=self.headers,
-                                      cookies={'Authorization': '33CFA2358B6C9135C8B6C9462A8B6C9B6588B6C9DBF6A1DFC7DB'})
+                                      cookies={'Authorization': '1BAAB0213B21A7B043B21A425E3B21A83663B21A255699AE35B2'})
 
     def parse_post(self, response):
 
