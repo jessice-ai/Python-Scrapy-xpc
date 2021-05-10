@@ -58,7 +58,7 @@ class SunXpcSpider(scrapy.Spider):
             # print(url % item)
             request = response.follow(url % item, callback=self.parse_post, headers=self.headers, dont_filter=True)
             request.meta['sun_url'] = url % item  # 把值传递到回调函数中  self.parse_post
-            # yield request  # 这里禁止掉,表示其他页面不跑,取消注释抓取所有页面里面的内容
+            yield request  # 这里禁止掉,表示其他页面不跑,取消注释抓取所有页面里面的内容
 
         Cookie = response.request.headers.getlist('Cookie')
         print(Cookie)
