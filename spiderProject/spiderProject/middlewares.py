@@ -195,7 +195,8 @@ class RandomProxyMiddlewate(object):
             #当某个IP的失败次数累计到一定量
             if self.SUN_RETRY_TIMES_RESPONSE == self.RETRY_TIMES:
                 #可以认为该IP已经被对方服务器封禁,从代理池中删除该IP
-                print('5、服务器 -> 错误码 (%s) ,拒绝IP 超%s次,已删除 代理 %s' % (response.status, self.RETRY_TIMES,curl_proxy))
+
+                print('5、服务器 -> 错误码 (%s) 超%s次,已删除 代理 %s' % (response.status, self.RETRY_TIMES,curl_proxy))
                 self.PROXYS.remove(curl_proxy)
                 del request.meta[self.scheme]
 
@@ -210,7 +211,7 @@ class RandomProxyMiddlewate(object):
                 # return self._retry(request, reason, spider) or response
 
             else:
-                print('5、服务器 -> 错误码 (%s) 拒绝IP（%s） 次数 %s ' % (response.status,curl_proxy,self.state[curl_proxy]))
+                print('5、服务器 -> 错误码 (%s) （%s） 次数 %s ' % (response.status,curl_proxy,self.state[curl_proxy]))
 
             return request
         else:
